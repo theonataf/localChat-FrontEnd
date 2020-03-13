@@ -1,4 +1,4 @@
-.Class {
-  display: inline-block;
-  max-width: 20rem;
+.username {
+  font-size: 15px;
+  margin-left: 10px;
 }
