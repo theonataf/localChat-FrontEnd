@@ -3,7 +3,7 @@ import React, { Component } from "react";
 import Card from "react-bootstrap/Card";
 import "./Message.css";
 import PropTypes from "prop-types";
-import { Row, Col } from "react-bootstrap";
+import { Row } from "react-bootstrap";
 
 class Message extends Component {
   constructor(props) {
@@ -13,7 +13,8 @@ class Message extends Component {
 
   style = {
     display: "inline-block",
-    maxWidth: "20rem"
+    maxWidth: "20rem",
+    marginBottom: "0.5rem"
   };
 
   render() {
@@ -25,7 +26,7 @@ class Message extends Component {
           style={this.style}
         >
           {!this.props.mine && (
-            <Card.Header style={{ padding: 0 }}>
+            <Card.Header style={{ padding: 0, paddingRight: "30px" }}>
               <span className="username">@{this.props.username}</span>
             </Card.Header>
           )}
