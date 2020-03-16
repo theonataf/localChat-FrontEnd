@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import "./App.css";
-import Message from "./Message";
+import Message, { saveNewEntry, initialiseMessages } from "./Message";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Container, Navbar, Form, Row, Button } from "react-bootstrap";
 
@@ -12,8 +12,17 @@ class App extends Component {
 
   constructor(props) {
     super(props);
-    this.state.messages = MOCKMESSAGES;
+    this.user = initialiseUsername();
   }
+
+  componentDidMount() {
+    initialiseMessages(this.displayMessages);
+  }
+
+  //arrow fx for binding
+  displayMessages = messages => {
+    this.setState({ messages: messages });
+  };
 
   //arrow fx for binding
   handleWriteMessage = event => {
@@ -21,17 +30,31 @@ class App extends Component {
     this.setState({ textBox: message });
   };
 
+  diplayNewMessage = message => {
+    const messages = this.state.messages;
+    messages.push(message);
+    this.setState({ messages: messages });
+  };
+
   //arrow fx for binding
-  HandleSendMessage = () => {
-    const { textBox, messages } = this.state;
-    if (textBox.length > 0) {
-      messages.push({
-        mine: false,
-        username: "Anaelle",
-        messageContent: textBox
-      });
-    }
-    this.setState({ messages: messages, textBox: "" });
+  HandleSendMessage = event => {
+    event.preventDefault();
+    const newEntry = {
+      messageContent: this.state.textBox,
+      mine: true,
+      username: this.user.username
+    };
+    saveNewEntry(newEntry, this.diplayNewMessage);
+
+    // const { textBox, messages } = this.state;
+    // if (textBox.length > 0) {
+    //   messages.push({
+    //     mine: false,
+    //     username: "Anaelle",
+    //     messageContent: textBox
+    //   });
+    // }
+    // this.setState({ messages: messages, textBox: "" });
   };
 
   render() {
@@ -44,9 +67,9 @@ class App extends Component {
           </Container>
         </Navbar>
         <Container className="messages p-4">
-          {messages.map((message, index) => (
+          {messages.map(message => (
             <Message
-              key={index}
+              key={message.id}
               mine={message.mine}
               username={message.username}
               messageContent={message.messageContent}
@@ -80,42 +103,27 @@ export default App;
 
 //
 
-const MOCKMESSAGES = [
-  {
-    mine: true,
-    username: "theo",
-    messageContent:
-      "Ceci est le premier message mais je peux aussi decider d'ecrire beaucoup plus mais ca"
-  },
-  {
-    mine: false,
-    username: "Maman",
-    messageContent: "Ceci est un petit message"
-  },
-  { mine: true, username: "theo", messageContent: "ah ouai ?" },
-  { mine: false, username: "JeSuisTheoNatsf", messageContent: "Okay" },
-  {
-    mine: true,
-    username: "theo",
-    messageContent:
-      "Ceci est le premier message mais je peux aussi decider d'ecrire beaucoup plus mais ca"
-  },
-  {
-    mine: true,
-    username: "theo",
-    messageContent:
-      "Ceci est le premier message mais je peux aussi decider d'ecrire beaucoup plus mais ca"
-  },
-  {
-    mine: true,
-    username: "theo",
-    messageContent:
-      "Ceci est le premier message mais je peux aussi decider d'ecrire beaucoup plus mais ca"
-  },
-  {
-    mine: true,
-    username: "theo",
-    messageContent:
-      "Ceci est le premier message mais je peux aussi decider d'ecrire beaucoup plus mais ca"
+// const MOCKMESSAGES = [
+//   {
+//     mine: true,
+//     username: "theo",
+//     messageContent:
+//       "Ceci est le premier message mais je peux aussi decider d'ecrire beaucoup plus mais ca"
+//   },
+//   {
+//     mine: false,
+//     username: "Maman",
+//     messageContent: "Ceci est un petit message"
+//   },
+// ];
+
+const USER_KEY = "::Messenger::User";
+
+function initialiseUsername() {
+  let user = JSON.parse(localStorage.getItem(USER_KEY));
+  if (user === null) {
+    user = { username: prompt("Choose a Username") };
+    localStorage.setItem(USER_KEY, JSON.stringify(user));
   }
-];
+  return user;
+}
