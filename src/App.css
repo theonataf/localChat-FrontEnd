@@ -1,0 +1,8 @@
+.btn-send {
+  height: 2.4rem;
+}
+
+.messages {
+  height: 550px;
+  overflow-y: scroll;
+}
