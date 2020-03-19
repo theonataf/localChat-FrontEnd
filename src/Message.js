@@ -47,21 +47,3 @@ Message.propTypes = {
 };
 
 export default Message;
-
-const MESSAGES_KEY = "::Messenger::Messages";
-
-export function saveNewEntry(entry, onStored) {
-  entry.date = new Date().toLocaleDateString();
-  entry.id = Date.now();
-
-  const entries = JSON.parse(localStorage.getItem(MESSAGES_KEY) || "[]");
-  entries.push(entry);
-
-  localStorage.setItem(MESSAGES_KEY, JSON.stringify(entries));
-  onStored(entry);
-}
-
-export function initialiseMessages(showContent) {
-  const messages = JSON.parse(localStorage.getItem(MESSAGES_KEY) || "[]");
-  showContent(messages);
-}
