@@ -1,8 +1,9 @@
 import React, { Component } from "react";
 import "./App.css";
-import Message, { saveNewEntry, initialiseMessages } from "./Message";
+import Message from "./Message";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Container, Navbar, Form, Row, Button } from "react-bootstrap";
+import ApiHandler from "./ApiHandler";
 
 class App extends Component {
   state = {
@@ -10,17 +11,19 @@ class App extends Component {
     messages: []
   };
 
-  constructor(props) {
-    super(props);
-    this.user = initialiseUsername();
-  }
-
-  componentDidMount() {
-    initialiseMessages(this.displayMessages);
-  }
+  componentDidMount = () => {
+    this.dbHanlder = new ApiHandler(this.displayMessages, this.addNewMessage);
+    this.dbHanlder.listenToNewMessages();
+  };
 
   //arrow fx for binding
   displayMessages = messages => {
+    this.setState({ messages: messages });
+  };
+
+  addNewMessage = message => {
+    const messages = this.state.messages;
+    messages.push(message);
     this.setState({ messages: messages });
   };
 
@@ -30,31 +33,13 @@ class App extends Component {
     this.setState({ textBox: message });
   };
 
-  diplayNewMessage = message => {
-    const messages = this.state.messages;
-    messages.push(message);
-    this.setState({ messages: messages });
-  };
-
   //arrow fx for binding
   HandleSendMessage = event => {
     event.preventDefault();
-    const newEntry = {
-      messageContent: this.state.textBox,
-      mine: true,
-      username: this.user.username
-    };
-    saveNewEntry(newEntry, this.diplayNewMessage);
-
-    // const { textBox, messages } = this.state;
-    // if (textBox.length > 0) {
-    //   messages.push({
-    //     mine: false,
-    //     username: "Anaelle",
-    //     messageContent: textBox
-    //   });
-    // }
-    // this.setState({ messages: messages, textBox: "" });
+    this.dbHanlder.sendNewMessage({
+      messageContent: this.state.textBox
+    });
+    this.setState({ textBox: "" });
   };
 
   render() {
@@ -70,8 +55,12 @@ class App extends Component {
           {messages.map(message => (
             <Message
               key={message.id}
-              mine={message.mine}
-              username={message.username}
+              mine={
+                message.user.username === this.dbHanlder.state.user.username
+                  ? true
+                  : false
+              }
+              username={message.user.username}
               messageContent={message.messageContent}
             />
           ))}
@@ -116,14 +105,3 @@ export default App;
 //     messageContent: "Ceci est un petit message"
 //   },
 // ];
-
-const USER_KEY = "::Messenger::User";
-
-function initialiseUsername() {
-  let user = JSON.parse(localStorage.getItem(USER_KEY));
-  if (user === null) {
-    user = { username: prompt("Choose a Username") };
-    localStorage.setItem(USER_KEY, JSON.stringify(user));
-  }
-  return user;
-}
