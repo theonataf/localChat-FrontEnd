@@ -4,21 +4,26 @@ import Message from "./Message";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Container, Navbar, Form, Row, Button } from "react-bootstrap";
 import ApiHandler from "./ApiHandler";
-import socketIOClient from "socket.io-client";
 
 class App extends Component {
   state = {
     textBox: "",
     messages: []
   };
-  socket = socketIOClient("http://localhost:8080");
 
   componentDidMount = () => {
-    this.dbHanlder = new ApiHandler(this.socket, this.displayMessages);
+    this.dbHanlder = new ApiHandler(this.displayMessages, this.addNewMessage);
+    this.dbHanlder.listenToNewMessages();
   };
 
   //arrow fx for binding
   displayMessages = messages => {
+    this.setState({ messages: messages });
+  };
+
+  addNewMessage = message => {
+    const messages = this.state.messages;
+    messages.push(message);
     this.setState({ messages: messages });
   };
 

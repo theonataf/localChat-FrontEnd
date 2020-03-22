@@ -7,12 +7,13 @@ class ApiHandler extends Component {
   };
 
   socket = socketIOClient(this.state.endpoint);
-  constructor(displayMessages) {
+  constructor(displayMessages, addNewMessage) {
     super();
     const username = prompt("Username ?");
     this.state.user = { username: username };
     this.socket.emit("newUser", this.state.user);
     this.displayMessages = displayMessages;
+    this.addNewMessage = addNewMessage;
     fetch("http://localhost:8080/getMessages")
       .then(blob => blob.json())
       .then(data => {
@@ -21,16 +22,17 @@ class ApiHandler extends Component {
       });
   }
 
-  componentDidMount() {
+  listenToNewMessages = () => {
     this.socket.on("newMessage", messages => {
       console.log("hey");
       this.displayMessages(messages);
     });
-  }
+  };
 
   sendNewMessage = message => {
     message.user = this.state.user;
     this.socket.emit("sendNewMessage", message);
+    this.addNewMessage(message);
   };
 
   render() {
