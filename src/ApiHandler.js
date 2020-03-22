@@ -1,43 +1,28 @@
-import socketIOClient from "socket.io-client";
-import React, { Component } from "react";
+class ApiHandler {
+  state = {};
 
-class ApiHandler extends Component {
-  state = {
-    endpoint: "http://localhost:8080"
-  };
-
-  socket = socketIOClient(this.state.endpoint);
-  constructor(showMessages) {
-    super();
-    this.displayMessages = showMessages;
-  }
-  connect() {
-    let username = "";
-    this.socket.on("refreshMessage", messages => {
+  constructor(socket, displayMessages) {
+    this.socket = socket;
+    const username = prompt("Username ?");
+    this.state.user = { username: username };
+    this.socket.emit("newUser", this.state.user);
+    this.displayMessages = displayMessages;
+    fetch("http://localhost:8080/getMessages")
+      .then(blob => blob.json())
+      .then(data => {
+        console.log(data);
+        this.displayMessages(data);
+      });
+    this.socket.on("newMessage", messages => {
+      console.log("hey");
       this.displayMessages(messages);
     });
-    this.socket.on("User", exists => {
-      if (!exists) {
-        username = prompt("Username");
-        this.socket.emit("newUser", {
-          username: username
-        });
-      } else {
-        username = exists.username;
-      }
-    });
-    return username;
   }
 
-  sendingNewMessage(message) {
+  sendNewMessage = message => {
+    message.user = this.state.user;
     this.socket.emit("sendNewMessage", message);
-  }
-
-  componentDidMount() {}
-
-  render() {
-    return null;
-  }
+  };
 }
 
 export default ApiHandler;

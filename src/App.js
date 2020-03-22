@@ -4,19 +4,18 @@ import Message from "./Message";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Container, Navbar, Form, Row, Button } from "react-bootstrap";
 import ApiHandler from "./ApiHandler";
+import socketIOClient from "socket.io-client";
 
 class App extends Component {
   state = {
     textBox: "",
-    messages: [],
-    user: { username: "" }
+    messages: []
   };
+  socket = socketIOClient("http://localhost:8080");
 
-  componentDidMount() {
-    this.dbHanlder = new ApiHandler(this.displayMessages);
-    const username = this.dbHanlder.connect();
-    this.setState({ user: { username: username } });
-  }
+  componentDidMount = () => {
+    this.dbHanlder = new ApiHandler(this.socket, this.displayMessages);
+  };
 
   //arrow fx for binding
   displayMessages = messages => {
@@ -29,24 +28,17 @@ class App extends Component {
     this.setState({ textBox: message });
   };
 
-  diplayNewMessage = message => {
-    const messages = this.state.messages;
-    messages.push(message);
-    this.setState({ messages: messages });
-  };
-
   //arrow fx for binding
   HandleSendMessage = event => {
     event.preventDefault();
-    const newEntry = {
+    this.dbHanlder.sendNewMessage({
       messageContent: this.state.textBox
-    };
-    this.dbHanlder.sendingNewMessage(newEntry);
+    });
     this.setState({ textBox: "" });
   };
 
   render() {
-    const { messages, user } = this.state;
+    const { messages } = this.state;
     return (
       <>
         <Navbar className="mb-4" expand="lg" variant="light" bg="dark">
@@ -58,8 +50,12 @@ class App extends Component {
           {messages.map(message => (
             <Message
               key={message.id}
-              mine={message.username === user.username ? true : false}
-              username={message.username}
+              mine={
+                message.user.username === this.dbHanlder.state.user.username
+                  ? true
+                  : false
+              }
+              username={message.user.username}
               messageContent={message.messageContent}
             />
           ))}
