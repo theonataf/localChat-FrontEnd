@@ -1,8 +1,14 @@
-class ApiHandler {
-  state = {};
+import socketIOClient from "socket.io-client";
+import { Component } from "react";
 
-  constructor(socket, displayMessages) {
-    this.socket = socket;
+class ApiHandler extends Component {
+  state = {
+    endpoint: "http://localhost:8080"
+  };
+
+  socket = socketIOClient(this.state.endpoint);
+  constructor(displayMessages) {
+    super();
     const username = prompt("Username ?");
     this.state.user = { username: username };
     this.socket.emit("newUser", this.state.user);
@@ -13,6 +19,9 @@ class ApiHandler {
         console.log(data);
         this.displayMessages(data);
       });
+  }
+
+  componentDidMount() {
     this.socket.on("newMessage", messages => {
       console.log("hey");
       this.displayMessages(messages);
@@ -23,6 +32,10 @@ class ApiHandler {
     message.user = this.state.user;
     this.socket.emit("sendNewMessage", message);
   };
+
+  render() {
+    return null;
+  }
 }
 
 export default ApiHandler;
